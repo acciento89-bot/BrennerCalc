@@ -1,0 +1,75 @@
+"home.subtitle" = "Tool for heating & service technicians";
+"home.hero" = "Calculate fast. Keep working.";
+"home.lead" = "Three compact calculators for oil burners, gas and heating water – no account, no cloud, no detours.";
+"home.safety" = "Calculation aid for trained professionals. Manufacturer specifications, measurements, combustion analysis and applicable rules always take precedence.";
+
+"calculator.oil.title" = "Oil burner & nozzle";
+"calculator.oil.short" = "Oil burner";
+"calculator.oil.subtitle" = "Calculate nozzle size, pump pressure and output in seconds.";
+"calculator.gas.title" = "Gas power";
+"calculator.gas.short" = "Gas";
+"calculator.gas.subtitle" = "Convert gas volume flow and power directly.";
+"calculator.water.title" = "Heating water flow";
+"calculator.water.short" = "Heating water";
+"calculator.water.subtitle" = "Calculate flow from power and temperature difference.";
+
+"oil.lead" = "Calculate actual nozzle flow at a different pump pressure or determine the required nozzle size from the desired output.";
+"oil.mode" = "Calculation direction";
+"oil.mode.nozzle" = "Nozzle → Power";
+"oil.mode.power" = "Power → Nozzle";
+"oil.nozzle" = "Rated nozzle size";
+"oil.desiredPower" = "Desired useful output";
+"oil.pressure" = "Pump pressure";
+"oil.actualFlowGPH" = "Actual flow";
+"oil.actualFlowL" = "Oil volume flow";
+"oil.requiredNozzle" = "Required rated nozzle";
+"oil.formulaNote" = "Rated nozzle size is referenced to 7 bar. Pressure correction: Q₂ = Q₁ × √(p₂ / 7 bar). Calorific value and efficiency remain adjustable.";
+
+"gas.lead" = "Calculate input and useful output from gas volume flow – or the required flow from a desired output.";
+"gas.mode" = "Calculation direction";
+"gas.mode.flow" = "Flow → Power";
+"gas.mode.power" = "Power → Flow";
+"gas.flow" = "Gas volume flow";
+"gas.desiredPower" = "Desired useful output";
+"gas.requiredFlow" = "Required volume flow";
+"gas.formulaNote" = "Calorific value in kWh/m³ depends on gas type and supply. Use the supplier or measured value for reliable results.";
+
+"water.lead" = "Calculate the required heating-water flow from heat output and temperature difference ΔT.";
+"water.power" = "Heat output";
+"water.deltaT" = "Temperature difference ΔT";
+"water.flowLH" = "Volume flow";
+"water.flowLMin" = "Volume flow";
+"water.flowM3H" = "Volume flow";
+"water.formulaNote" = "Uses 1.163 Wh/(l·K) as a practical approximation for water in heating systems.";
+
+"common.calorific" = "Calorific value";
+"common.efficiency" = "Efficiency";
+"common.inputPower" = "Input power";
+"common.outputPower" = "Useful output";
+"common.close" = "Close";
+"common.done" = "Done";
+
+"pro.title" = "BrennerCalc Pro";
+"pro.subtitle" = "Unlock once. Use every professional calculator.";
+"pro.feature.gas" = "Gas power calculator";
+"pro.feature.water" = "Heating water flow";
+"pro.feature.future" = "Future Pro calculators included";
+"pro.feature.noAds" = "No ads, no subscription";
+"pro.buy" = "Unlock Pro";
+"pro.restore" = "Restore purchases";
+"pro.note" = "One-time in-app purchase. The final price is shown by the App Store.";
+
+"settings.title" = "Settings";
+"settings.language" = "Language";
+"settings.pro.active" = "BrennerCalc Pro active";
+"settings.pro.activeNote" = "All calculators are unlocked.";
+"settings.pro.free" = "Free version";
+"settings.pro.freeNote" = "Oil burner calculator included. Gas and heating water require Pro.";
+"settings.pro.unlock" = "Unlock Pro";
+"settings.about" = "About BrennerCalc";
+"settings.aboutText" = "Compact calculation aid for heating and service technicians. Developed by Kamilunavo.";
+"settings.disclaimer" = "BrennerCalc does not replace manufacturer documentation, standards, safety checks or combustion analysis. Inputs and results must be professionally verified.";
+
+"store.unavailable" = "The in-app purchase is currently unavailable.";
+"store.verificationFailed" = "The purchase could not be verified.";
+"store.pending" = "The purchase is still awaiting approval.";
