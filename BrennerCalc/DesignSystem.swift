@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 enum AppTheme {
     static let background = LinearGradient(
@@ -47,8 +48,27 @@ struct CalculatorScreen<Content: View>: View {
                 .padding(18)
                 .padding(.bottom, 30)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("common.done") {
+                    dismissKeyboard()
+                }
+                .fontWeight(.semibold)
+            }
+        }
+    }
+
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
     }
 }
 
