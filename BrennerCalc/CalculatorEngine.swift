@@ -112,6 +112,6 @@ enum CalculatorEngine {
     }
 
     private static func clampedEfficiency(_ percent: Double) -> Double {
-        min(max(percent, 0), 100) / 100
+        min(max(percent, 0), 120) / 100
     }
 }
