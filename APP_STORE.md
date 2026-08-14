@@ -5,16 +5,16 @@
 - App name: BrennerCalc
 - Bundle ID: `de.kamilunavo.brennercalc`
 - Version: `1.0.0`
-- Initial build: `1`
+- Current submission build: `2`
 - Category: Utilities
 - Pro product: `de.kamilunavo.brennercalc.pro`
 - Product type: Non-Consumable
-- Suggested price: EUR 4.99
+- Price: EUR 4.99
 
 ## German listing
 
 ### Subtitle
-Schnelle Rechner für SHK-Profis
+Schnelle SHK-Rechner
 
 ### Promotional text
 Ölbrenner, Gasleistung und Heizwasser-Volumenstrom schnell und übersichtlich direkt auf iPhone und iPad berechnen.
@@ -25,7 +25,7 @@ BrennerCalc ist ein kompaktes Rechenwerkzeug für Heizungs-, SHK- und Servicetec
 Die App konzentriert sich bewusst auf schnelle Berechnungen ohne Account, Werbung oder unnötige Ablenkung.
 
 Funktionen:
-- Ölbrenner: Düsengröße, Pumpendruck, Heizwert und Wirkungsgrad berechnen
+- Ölbrenner: Düsengröße und Pumpendruck berücksichtigen sowie Ölmenge und Leistung berechnen
 - Rückwärtsberechnung: gewünschte Leistung in benötigte Düsengröße umrechnen
 - Gas: Volumenstrom und Heizwert in Brennerleistung umrechnen
 - Heizwasser: benötigten Volumenstrom aus Leistung und Spreizung berechnen
@@ -58,7 +58,7 @@ BrennerCalc is a compact calculation tool for heating, HVAC and service technici
 The app focuses on fast calculations without accounts, advertising or unnecessary distractions.
 
 Features:
-- Oil burner: calculate nozzle size, pump pressure, fuel heating value and efficiency
+- Oil burner: account for nozzle size and pump pressure and calculate oil flow and output
 - Reverse calculation: convert desired output into required nozzle size
 - Gas: convert volume flow and heating value into burner input/output
 - Hydronics: calculate required water flow from heat output and temperature difference
@@ -77,11 +77,18 @@ HVAC,heating,burner,oil,nozzle,gas,hydronic,flow,technician,service
 ### What to Test
 Please test the oil burner calculation in both directions: nozzle size to output and desired output to required nozzle size. Also test DE/EN language switching, the Pro paywall, restore purchases and the gas/hydronic calculators after Pro unlock.
 
-## URLs to prepare before App Review
+## URLs
 
 - Support URL: `https://kamilunavo.com/support`
-- Privacy Policy URL: create a BrennerCalc-specific privacy page before final App Review submission.
+- Privacy Policy URL: `https://kamilunavo.com/brennercalc/privacy`
+- Marketing URL: optional; leave blank for 1.0 if no dedicated product page is live yet.
+
+## App privacy
+
+BrennerCalc does not collect app data, does not track users, has no advertising or third-party analytics, and performs calculation inputs locally on device. StoreKit is used only for the one-time BrennerCalc Pro purchase and restore flow.
 
 ## Review notes draft
 
 BrennerCalc is an offline calculation utility for trained heating/HVAC professionals. No account is required. The free oil-burner calculator is available immediately. BrennerCalc Pro is a one-time non-consumable in-app purchase that unlocks the gas and hydronic calculators. Product ID: `de.kamilunavo.brennercalc.pro`.
+
+No demo account is required. All calculation inputs are processed locally on device.
