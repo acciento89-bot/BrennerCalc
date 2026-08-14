@@ -31,11 +31,19 @@ struct SettingsView: View {
                                     .font(.title2)
                                     .foregroundStyle(AppTheme.accent)
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(store.isPro ? "settings.pro.active" : "settings.pro.free")
-                                        .font(.headline)
-                                    Text(store.isPro ? "settings.pro.activeNote" : "settings.pro.freeNote")
-                                        .font(.subheadline)
-                                        .foregroundStyle(AppTheme.muted)
+                                    if store.isPro {
+                                        Text("settings.pro.active")
+                                            .font(.headline)
+                                        Text("settings.pro.activeNote")
+                                            .font(.subheadline)
+                                            .foregroundStyle(AppTheme.muted)
+                                    } else {
+                                        Text("settings.pro.free")
+                                            .font(.headline)
+                                        Text("settings.pro.freeNote")
+                                            .font(.subheadline)
+                                            .foregroundStyle(AppTheme.muted)
+                                    }
                                 }
                                 Spacer()
                             }
