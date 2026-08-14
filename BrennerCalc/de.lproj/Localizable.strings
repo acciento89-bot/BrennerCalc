@@ -1,0 +1,75 @@
+"home.subtitle" = "Werkzeug für Heizungs- & Servicetechnik";
+"home.hero" = "Schnell rechnen. Direkt weiterarbeiten.";
+"home.lead" = "Drei kompakte Rechner für Brenner, Gas und Heizwasser – ohne Konto, ohne Cloud, ohne Umwege.";
+"home.safety" = "Berechnungshilfe für Fachkräfte. Herstellerangaben, Messwerte, Verbrennungsanalyse und geltende Vorschriften haben immer Vorrang.";
+
+"calculator.oil.title" = "Ölbrenner & Düse";
+"calculator.oil.short" = "Ölbrenner";
+"calculator.oil.subtitle" = "Düsengröße, Pumpendruck und Leistung in Sekunden berechnen.";
+"calculator.gas.title" = "Gasleistung";
+"calculator.gas.short" = "Gas";
+"calculator.gas.subtitle" = "Volumenstrom und Leistung direkt umrechnen.";
+"calculator.water.title" = "Heizwasser-Volumenstrom";
+"calculator.water.short" = "Heizwasser";
+"calculator.water.subtitle" = "Volumenstrom aus Leistung und Temperaturspreizung.";
+
+"oil.lead" = "Berechne den tatsächlichen Düsendurchsatz bei verändertem Pumpendruck oder ermittle die benötigte Düsengröße aus der gewünschten Leistung.";
+"oil.mode" = "Berechnungsrichtung";
+"oil.mode.nozzle" = "Düse → Leistung";
+"oil.mode.power" = "Leistung → Düse";
+"oil.nozzle" = "Nenn-Düsengröße";
+"oil.desiredPower" = "Gewünschte Nutzleistung";
+"oil.pressure" = "Pumpendruck";
+"oil.actualFlowGPH" = "Tatsächlicher Durchsatz";
+"oil.actualFlowL" = "Ölvolumenstrom";
+"oil.requiredNozzle" = "Benötigte Nenn-Düse";
+"oil.formulaNote" = "Die Nenn-Düsengröße wird auf 7 bar bezogen. Druckkorrektur: Q₂ = Q₁ × √(p₂ / 7 bar). Heizwert und Wirkungsgrad sind bewusst einstellbar.";
+
+"gas.lead" = "Berechne die Feuerungs- und Nutzleistung aus dem Gasvolumenstrom – oder den erforderlichen Volumenstrom aus einer gewünschten Leistung.";
+"gas.mode" = "Berechnungsrichtung";
+"gas.mode.flow" = "Volumen → Leistung";
+"gas.mode.power" = "Leistung → Volumen";
+"gas.flow" = "Gasvolumenstrom";
+"gas.desiredPower" = "Gewünschte Nutzleistung";
+"gas.requiredFlow" = "Erforderlicher Volumenstrom";
+"gas.formulaNote" = "Der Heizwert in kWh/m³ hängt von Gasart und Versorgung ab. Für belastbare Ergebnisse den Wert des Versorgers bzw. der Messung verwenden.";
+
+"water.lead" = "Ermittle den erforderlichen Heizwasser-Volumenstrom aus Wärmeleistung und Temperaturspreizung ΔT.";
+"water.power" = "Wärmeleistung";
+"water.deltaT" = "Temperaturspreizung ΔT";
+"water.flowLH" = "Volumenstrom";
+"water.flowLMin" = "Volumenstrom";
+"water.flowM3H" = "Volumenstrom";
+"water.formulaNote" = "Berechnung mit 1,163 Wh/(l·K) als praxisüblichem Näherungswert für Wasser in Heizungsanlagen.";
+
+"common.calorific" = "Heizwert";
+"common.efficiency" = "Wirkungsgrad";
+"common.inputPower" = "Feuerungsleistung";
+"common.outputPower" = "Nutzleistung";
+"common.close" = "Schließen";
+"common.done" = "Fertig";
+
+"pro.title" = "BrennerCalc Pro";
+"pro.subtitle" = "Einmal freischalten. Alle Profi-Rechner nutzen.";
+"pro.feature.gas" = "Gasleistungs-Rechner";
+"pro.feature.water" = "Heizwasser-Volumenstrom";
+"pro.feature.future" = "Künftige Pro-Rechner inklusive";
+"pro.feature.noAds" = "Keine Werbung, kein Abo";
+"pro.buy" = "Pro freischalten";
+"pro.restore" = "Käufe wiederherstellen";
+"pro.note" = "Einmaliger In-App-Kauf. Der endgültige Preis wird vom App Store angezeigt.";
+
+"settings.title" = "Einstellungen";
+"settings.language" = "Sprache";
+"settings.pro.active" = "BrennerCalc Pro aktiv";
+"settings.pro.activeNote" = "Alle Rechner sind freigeschaltet.";
+"settings.pro.free" = "Kostenlose Version";
+"settings.pro.freeNote" = "Ölbrenner-Rechner inklusive. Gas und Heizwasser mit Pro.";
+"settings.pro.unlock" = "Pro freischalten";
+"settings.about" = "Über BrennerCalc";
+"settings.aboutText" = "Kompakte Berechnungshilfe für Heizungs- und Servicetechniker. Entwickelt von Kamilunavo.";
+"settings.disclaimer" = "BrennerCalc ersetzt keine Herstellerunterlagen, Normen, Sicherheitsprüfungen oder Verbrennungsanalyse. Eingaben und Ergebnisse müssen fachlich geprüft werden.";
+
+"store.unavailable" = "Der In-App-Kauf ist momentan nicht verfügbar.";
+"store.verificationFailed" = "Der Kauf konnte nicht verifiziert werden.";
+"store.pending" = "Der Kauf wartet noch auf Bestätigung.";
