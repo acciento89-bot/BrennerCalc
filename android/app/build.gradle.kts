@@ -12,19 +12,12 @@ val generateLauncherIcon by tasks.registering {
         if (!sourceIcon.isFile) throw GradleException("Canonical BrennerCalc AppIcon is missing: ${sourceIcon.path}")
         val source = javax.imageio.ImageIO.read(sourceIcon)
             ?: throw GradleException("Canonical BrennerCalc AppIcon could not be decoded")
-        val normalized = java.awt.image.BufferedImage(source.width, source.height, java.awt.image.BufferedImage.TYPE_INT_ARGB)
-        val graphics = normalized.createGraphics()
-        try {
-            graphics.drawImage(source, 0, 0, null)
-        } finally {
-            graphics.dispose()
-        }
         listOf(
             generatedIconResDir.resolve("drawable-nodpi/app_icon_source.png"),
             generatedIconResDir.resolve("mipmap-nodpi/ic_launcher.png"),
         ).forEach { output ->
             output.parentFile.mkdirs()
-            if (!javax.imageio.ImageIO.write(normalized, "png", output)) {
+            if (!javax.imageio.ImageIO.write(source, "png", output)) {
                 throw GradleException("Could not encode normalized BrennerCalc launcher icon")
             }
         }
@@ -35,12 +28,7 @@ val uploadKeystorePath = System.getenv("ANDROID_UPLOAD_KEYSTORE_PATH")
 val uploadStorePassword = System.getenv("ANDROID_UPLOAD_STORE_PASSWORD")
 val uploadKeyAlias = System.getenv("ANDROID_UPLOAD_KEY_ALIAS")
 val uploadKeyPassword = System.getenv("ANDROID_UPLOAD_KEY_PASSWORD")
-val releaseSigningEnabled = listOf(
-    uploadKeystorePath,
-    uploadStorePassword,
-    uploadKeyAlias,
-    uploadKeyPassword,
-).all { !it.isNullOrBlank() }
+val releaseSigningEnabled = listOf(uploadKeystorePath, uploadStorePassword, uploadKeyAlias, uploadKeyPassword).all { !it.isNullOrBlank() }
 
 android {
     namespace = "de.kamilunavo.brennercalc"
@@ -56,12 +44,7 @@ android {
     }
 
     sourceSets.getByName("main").res.srcDir(generatedIconResDir)
-
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-
+    buildFeatures { compose = true; buildConfig = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -81,34 +64,24 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            if (releaseSigningEnabled) {
-                signingConfig = signingConfigs.getByName("release")
-            }
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (releaseSigningEnabled) signingConfig = signingConfigs.getByName("release")
         }
     }
 }
 
-tasks.named("preBuild").configure {
-    dependsOn(generateLauncherIcon)
-}
+tasks.named("preBuild").configure { dependsOn(generateLauncherIcon) }
 
 dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.activity:activity-compose:1.12.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
-
     implementation(platform("androidx.compose:compose-bom:2026.06.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
-
     implementation("com.android.billingclient:billing-ktx:9.1.0")
-
     testImplementation("junit:junit:4.13.2")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
