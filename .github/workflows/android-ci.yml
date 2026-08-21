@@ -49,12 +49,19 @@ jobs:
       - name: Build unsigned release App Bundle
         run: gradle -p android bundleRelease --stacktrace
 
-      - name: Verify release identity
+      - name: Verify release identity and launcher icon
         shell: bash
         run: |
           set -euo pipefail
           AAB='android/app/build/outputs/bundle/release/app-release.aab'
           test -s "$AAB"
+          grep -Fq 'applicationId = "de.kamilunavo.brennercalc"' android/app/build.gradle.kts
+          grep -Fq 'targetSdk = 36' android/app/build.gradle.kts
+          grep -Fq 'versionCode = 2' android/app/build.gradle.kts
+          grep -Fq 'versionName = "1.0.1"' android/app/build.gradle.kts
+          grep -Fq 'android:icon="@mipmap/ic_launcher"' android/app/src/main/AndroidManifest.xml
+          test -f android/app/src/main/res/mipmap-nodpi/ic_launcher.png
+          test -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
           sha256sum "$AAB" | tee android/app/build/outputs/bundle/release/app-release.aab.sha256
 
       - name: Upload unsigned release bundle
