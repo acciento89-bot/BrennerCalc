@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -52,7 +51,6 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class AppLanguage { DE, EN }
-
 enum class CalculatorTab { OIL, GAS, WATER }
 
 @Composable
@@ -60,21 +58,18 @@ private fun BrennerCalcRoot(activity: Activity, billing: BillingManager) {
     var language by remember { mutableStateOf(AppLanguage.DE) }
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = CalculatorTab.entries
-    val colorScheme = darkColorScheme(
-        primary = Color(0xFFFFA726),
-        secondary = Color(0xFF29B6F6),
-        background = Color(0xFF111318),
-        surface = Color(0xFF1A1D24),
-    )
 
-    MaterialTheme(colorScheme = colorScheme) {
+    MaterialTheme(
+        colorScheme = darkColorScheme(
+            primary = Color(0xFFFFA726),
+            secondary = Color(0xFF29B6F6),
+            background = Color(0xFF111318),
+            surface = Color(0xFF1A1D24),
+        )
+    ) {
         Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                Header(language = language, onLanguage = { language = it })
+            Column(Modifier.fillMaxSize().padding(padding)) {
+                Header(language) { language = it }
                 ScrollableTabRow(selectedTabIndex = selectedTab) {
                     tabs.forEachIndexed { index, tab ->
                         Tab(
@@ -110,6 +105,7 @@ private fun BrennerCalcRoot(activity: Activity, billing: BillingManager) {
                             Text(if (language == AppLanguage.DE) "Käufe wiederherstellen" else "Restore purchases")
                         }
                     }
+
                     billing.statusMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                     Text(
                         if (language == AppLanguage.DE)
@@ -127,24 +123,24 @@ private fun BrennerCalcRoot(activity: Activity, billing: BillingManager) {
 
 @Composable
 private fun Header(language: AppLanguage, onLanguage: (AppLanguage) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Column {
-            Text("BrennerCalc", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
-            Text(
-                if (language == AppLanguage.DE) "Schnelle SHK-Rechner" else "Fast calculators for HVAC pros",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.LightGray,
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            if (language == AppLanguage.DE) Button(onClick = { onLanguage(AppLanguage.DE) }) { Text("DE") }
-            else OutlinedButton(onClick = { onLanguage(AppLanguage.DE) }) { Text("DE") }
-
-            if (language == AppLanguage.EN) Button(onClick = { onLanguage(AppLanguage.EN) }) { Text("EN") }
-            else OutlinedButton(onClick = { onLanguage(AppLanguage.EN) }) { Text("EN") }
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp)) {
+        Text("BrennerCalc", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+        Text(
+            if (language == AppLanguage.DE) "Schnelle SHK-Rechner" else "Fast calculators for HVAC pros",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.LightGray,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+            if (language == AppLanguage.DE) {
+                Button(onClick = { onLanguage(AppLanguage.DE) }) { Text("DE") }
+            } else {
+                OutlinedButton(onClick = { onLanguage(AppLanguage.DE) }) { Text("DE") }
+            }
+            if (language == AppLanguage.EN) {
+                Button(onClick = { onLanguage(AppLanguage.EN) }) { Text("EN") }
+            } else {
+                OutlinedButton(onClick = { onLanguage(AppLanguage.EN) }) { Text("EN") }
+            }
         }
     }
 }
@@ -164,40 +160,36 @@ private fun OilCalculator(language: AppLanguage) {
     var calorific by remember { mutableStateOf("10") }
     var efficiency by remember { mutableStateOf("90") }
 
-    CalculatorCard(title = if (language == AppLanguage.DE) "Ölbrenner" else "Oil burner") {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            if (!reverse) Button(onClick = { reverse = false }, modifier = Modifier.weight(1f)) {
-                Text(if (language == AppLanguage.DE) "Düse → Leistung" else "Nozzle → output")
-            } else OutlinedButton(onClick = { reverse = false }, modifier = Modifier.weight(1f)) {
-                Text(if (language == AppLanguage.DE) "Düse → Leistung" else "Nozzle → output")
-            }
+    CalculatorCard(if (language == AppLanguage.DE) "Ölbrenner" else "Oil burner") {
+        ModeButtons(
+            firstSelected = !reverse,
+            firstTitle = if (language == AppLanguage.DE) "Düse → Leistung" else "Nozzle → output",
+            secondTitle = if (language == AppLanguage.DE) "Leistung → Düse" else "Output → nozzle",
+            onFirst = { reverse = false },
+            onSecond = { reverse = true },
+        )
 
-            if (reverse) Button(onClick = { reverse = true }, modifier = Modifier.weight(1f)) {
-                Text(if (language == AppLanguage.DE) "Leistung → Düse" else "Output → nozzle")
-            } else OutlinedButton(onClick = { reverse = true }, modifier = Modifier.weight(1f)) {
-                Text(if (language == AppLanguage.DE) "Leistung → Düse" else "Output → nozzle")
-            }
+        if (reverse) {
+            NumberField(if (language == AppLanguage.DE) "Gewünschte Leistung kW" else "Desired output kW", desiredKw) { desiredKw = it }
+        } else {
+            NumberField(if (language == AppLanguage.DE) "Düsengröße USgal/h @ 7 bar" else "Nozzle USgal/h @ 7 bar", ratedGph) { ratedGph = it }
         }
-
-        if (reverse) NumberField(if (language == AppLanguage.DE) "Gewünschte Leistung kW" else "Desired output kW", desiredKw) { desiredKw = it }
-        else NumberField(if (language == AppLanguage.DE) "Düsengröße USgal/h @ 7 bar" else "Nozzle USgal/h @ 7 bar", ratedGph) { ratedGph = it }
-
         NumberField(if (language == AppLanguage.DE) "Pumpendruck bar" else "Pump pressure bar", pressure) { pressure = it }
         NumberField(if (language == AppLanguage.DE) "Heizwert kWh/l" else "Calorific value kWh/l", calorific) { calorific = it }
         NumberField(if (language == AppLanguage.DE) "Wirkungsgrad %" else "Efficiency %", efficiency) { efficiency = it }
 
         if (reverse) {
-            val r = CalculatorEngine.oilReverse(desiredKw.number(), pressure.number(), calorific.number(), efficiency.number())
-            ResultLine(if (language == AppLanguage.DE) "Benötigte Düse" else "Required nozzle", "${fmt(r.requiredRatedGPH, 3)} USgal/h")
-            ResultLine(if (language == AppLanguage.DE) "Tatsächlicher Durchsatz" else "Actual flow", "${fmt(r.actualGPH, 3)} USgal/h")
-            ResultLine(if (language == AppLanguage.DE) "Ölmenge" else "Oil flow", "${fmt(r.litersPerHour)} l/h")
-            ResultLine(if (language == AppLanguage.DE) "Feuerungsleistung" else "Input", "${fmt(r.inputKW)} kW")
+            val result = CalculatorEngine.oilReverse(desiredKw.number(), pressure.number(), calorific.number(), efficiency.number())
+            ResultLine(if (language == AppLanguage.DE) "Benötigte Düse" else "Required nozzle", "${fmt(result.requiredRatedGPH, 3)} USgal/h")
+            ResultLine(if (language == AppLanguage.DE) "Tatsächlicher Durchsatz" else "Actual flow", "${fmt(result.actualGPH, 3)} USgal/h")
+            ResultLine(if (language == AppLanguage.DE) "Ölmenge" else "Oil flow", "${fmt(result.litersPerHour)} l/h")
+            ResultLine(if (language == AppLanguage.DE) "Feuerungsleistung" else "Input", "${fmt(result.inputKW)} kW")
         } else {
-            val r = CalculatorEngine.oil(ratedGph.number(), pressure.number(), calorific.number(), efficiency.number())
-            ResultLine(if (language == AppLanguage.DE) "Tatsächlicher Durchsatz" else "Actual flow", "${fmt(r.actualGPH, 3)} USgal/h")
-            ResultLine(if (language == AppLanguage.DE) "Ölmenge" else "Oil flow", "${fmt(r.litersPerHour)} l/h")
-            ResultLine(if (language == AppLanguage.DE) "Feuerungsleistung" else "Input", "${fmt(r.inputKW)} kW")
-            ResultLine(if (language == AppLanguage.DE) "Nutzleistung" else "Output", "${fmt(r.outputKW)} kW")
+            val result = CalculatorEngine.oil(ratedGph.number(), pressure.number(), calorific.number(), efficiency.number())
+            ResultLine(if (language == AppLanguage.DE) "Tatsächlicher Durchsatz" else "Actual flow", "${fmt(result.actualGPH, 3)} USgal/h")
+            ResultLine(if (language == AppLanguage.DE) "Ölmenge" else "Oil flow", "${fmt(result.litersPerHour)} l/h")
+            ResultLine(if (language == AppLanguage.DE) "Feuerungsleistung" else "Input", "${fmt(result.inputKW)} kW")
+            ResultLine(if (language == AppLanguage.DE) "Nutzleistung" else "Output", "${fmt(result.outputKW)} kW")
         }
     }
 }
@@ -210,27 +202,31 @@ private fun GasCalculator(language: AppLanguage) {
     var calorific by remember { mutableStateOf("10,5") }
     var efficiency by remember { mutableStateOf("95") }
 
-    CalculatorCard(title = "Gas") {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            if (!reverse) Button(onClick = { reverse = false }, modifier = Modifier.weight(1f)) { Text(if (language == AppLanguage.DE) "Volumen → Leistung" else "Flow → output") }
-            else OutlinedButton(onClick = { reverse = false }, modifier = Modifier.weight(1f)) { Text(if (language == AppLanguage.DE) "Volumen → Leistung" else "Flow → output") }
-            if (reverse) Button(onClick = { reverse = true }, modifier = Modifier.weight(1f)) { Text(if (language == AppLanguage.DE) "Leistung → Volumen" else "Output → flow") }
-            else OutlinedButton(onClick = { reverse = true }, modifier = Modifier.weight(1f)) { Text(if (language == AppLanguage.DE) "Leistung → Volumen" else "Output → flow") }
-        }
+    CalculatorCard("Gas") {
+        ModeButtons(
+            firstSelected = !reverse,
+            firstTitle = if (language == AppLanguage.DE) "Volumen → Leistung" else "Flow → output",
+            secondTitle = if (language == AppLanguage.DE) "Leistung → Volumen" else "Output → flow",
+            onFirst = { reverse = false },
+            onSecond = { reverse = true },
+        )
 
-        if (reverse) NumberField(if (language == AppLanguage.DE) "Gewünschte Leistung kW" else "Desired output kW", desiredKw) { desiredKw = it }
-        else NumberField(if (language == AppLanguage.DE) "Gasvolumenstrom m³/h" else "Gas flow m³/h", flow) { flow = it }
+        if (reverse) {
+            NumberField(if (language == AppLanguage.DE) "Gewünschte Leistung kW" else "Desired output kW", desiredKw) { desiredKw = it }
+        } else {
+            NumberField(if (language == AppLanguage.DE) "Gasvolumenstrom m³/h" else "Gas flow m³/h", flow) { flow = it }
+        }
         NumberField(if (language == AppLanguage.DE) "Heizwert kWh/m³" else "Calorific value kWh/m³", calorific) { calorific = it }
         NumberField(if (language == AppLanguage.DE) "Wirkungsgrad %" else "Efficiency %", efficiency) { efficiency = it }
 
         if (reverse) {
-            val r = CalculatorEngine.gasReverse(desiredKw.number(), calorific.number(), efficiency.number())
-            ResultLine(if (language == AppLanguage.DE) "Benötigter Volumenstrom" else "Required flow", "${fmt(r.cubicMetersPerHour, 3)} m³/h")
-            ResultLine(if (language == AppLanguage.DE) "Feuerungsleistung" else "Input", "${fmt(r.inputKW)} kW")
+            val result = CalculatorEngine.gasReverse(desiredKw.number(), calorific.number(), efficiency.number())
+            ResultLine(if (language == AppLanguage.DE) "Benötigter Volumenstrom" else "Required flow", "${fmt(result.cubicMetersPerHour, 3)} m³/h")
+            ResultLine(if (language == AppLanguage.DE) "Feuerungsleistung" else "Input", "${fmt(result.inputKW)} kW")
         } else {
-            val r = CalculatorEngine.gas(flow.number(), calorific.number(), efficiency.number())
-            ResultLine(if (language == AppLanguage.DE) "Feuerungsleistung" else "Input", "${fmt(r.inputKW)} kW")
-            ResultLine(if (language == AppLanguage.DE) "Nutzleistung" else "Output", "${fmt(r.outputKW)} kW")
+            val result = CalculatorEngine.gas(flow.number(), calorific.number(), efficiency.number())
+            ResultLine(if (language == AppLanguage.DE) "Feuerungsleistung" else "Input", "${fmt(result.inputKW)} kW")
+            ResultLine(if (language == AppLanguage.DE) "Nutzleistung" else "Output", "${fmt(result.outputKW)} kW")
         }
     }
 }
@@ -239,41 +235,54 @@ private fun GasCalculator(language: AppLanguage) {
 private fun WaterCalculator(language: AppLanguage) {
     var power by remember { mutableStateOf("20") }
     var deltaT by remember { mutableStateOf("20") }
-    val r = CalculatorEngine.water(power.number(), deltaT.number())
+    val result = CalculatorEngine.water(power.number(), deltaT.number())
 
-    CalculatorCard(title = if (language == AppLanguage.DE) "Heizwasser" else "Hydronics") {
+    CalculatorCard(if (language == AppLanguage.DE) "Heizwasser" else "Hydronics") {
         NumberField(if (language == AppLanguage.DE) "Leistung kW" else "Heat output kW", power) { power = it }
         NumberField(if (language == AppLanguage.DE) "Spreizung ΔT K" else "Temperature difference ΔT K", deltaT) { deltaT = it }
-        ResultLine(if (language == AppLanguage.DE) "Volumenstrom" else "Flow", "${fmt(r.litersPerHour)} l/h")
-        ResultLine(if (language == AppLanguage.DE) "Volumenstrom" else "Flow", "${fmt(r.litersPerMinute)} l/min")
-        ResultLine(if (language == AppLanguage.DE) "Volumenstrom" else "Flow", "${fmt(r.cubicMetersPerHour, 3)} m³/h")
+        ResultLine(if (language == AppLanguage.DE) "Volumenstrom" else "Flow", "${fmt(result.litersPerHour)} l/h")
+        ResultLine(if (language == AppLanguage.DE) "Volumenstrom" else "Flow", "${fmt(result.litersPerMinute)} l/min")
+        ResultLine(if (language == AppLanguage.DE) "Volumenstrom" else "Flow", "${fmt(result.cubicMetersPerHour, 3)} m³/h")
     }
 }
 
 @Composable
 private fun ProGate(language: AppLanguage, activity: Activity, billing: BillingManager) {
-    CalculatorCard(title = "BrennerCalc Pro") {
+    CalculatorCard("BrennerCalc Pro") {
         Text(
             if (language == AppLanguage.DE)
                 "Gas- und Heizwasser-Rechner dauerhaft freischalten. Einmaliger Kauf, kein Abo."
             else
-                "Permanently unlock gas and hydronic calculators. One-time purchase, no subscription.",
+                "Permanently unlock gas and hydronic calculators. One-time purchase, no subscription."
         )
         Button(
             onClick = { billing.launchPurchase(activity) },
             modifier = Modifier.fillMaxWidth(),
             enabled = billing.billingReady,
         ) {
-            Text(
-                if (language == AppLanguage.DE)
-                    "Pro freischalten${billing.productPrice?.let { " · $it" } ?: ""}"
-                else
-                    "Unlock Pro${billing.productPrice?.let { " · $it" } ?: ""}"
-            )
+            val price = billing.productPrice?.let { " · $it" } ?: ""
+            Text(if (language == AppLanguage.DE) "Pro freischalten$price" else "Unlock Pro$price")
         }
         OutlinedButton(onClick = billing::restorePurchases, modifier = Modifier.fillMaxWidth()) {
             Text(if (language == AppLanguage.DE) "Käufe wiederherstellen" else "Restore purchases")
         }
+    }
+}
+
+@Composable
+private fun ModeButtons(
+    firstSelected: Boolean,
+    firstTitle: String,
+    secondTitle: String,
+    onFirst: () -> Unit,
+    onSecond: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (firstSelected) Button(onClick = onFirst, modifier = Modifier.fillMaxWidth()) { Text(firstTitle) }
+        else OutlinedButton(onClick = onFirst, modifier = Modifier.fillMaxWidth()) { Text(firstTitle) }
+
+        if (!firstSelected) Button(onClick = onSecond, modifier = Modifier.fillMaxWidth()) { Text(secondTitle) }
+        else OutlinedButton(onClick = onSecond, modifier = Modifier.fillMaxWidth()) { Text(secondTitle) }
     }
 }
 
@@ -283,10 +292,7 @@ private fun CalculatorCard(title: String, content: @Composable ColumnScope.() ->
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
             content()
         }
@@ -309,13 +315,11 @@ private fun NumberField(label: String, value: String, onValueChange: (String) ->
 
 @Composable
 private fun ResultLine(label: String, value: String) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(label, color = Color.LightGray)
         Text(value, fontWeight = FontWeight.Bold)
     }
 }
 
 private fun String.number(): Double = replace(',', '.').toDoubleOrNull() ?: 0.0
-
-private fun fmt(value: Double, digits: Int = 2): String =
-    String.format(Locale.GERMANY, "%.${digits}f", value)
+private fun fmt(value: Double, digits: Int = 2): String = String.format(Locale.GERMANY, "%.${digits}f", value)
