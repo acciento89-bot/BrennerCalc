@@ -19,7 +19,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -43,5 +43,26 @@ jobs:
       - name: Unit tests
         run: gradle -p android testDebugUnitTest --stacktrace
 
-      - name: Build Android App Bundle
+      - name: Build debug App Bundle
         run: gradle -p android bundleDebug --stacktrace
+
+      - name: Build unsigned release App Bundle
+        run: gradle -p android bundleRelease --stacktrace
+
+      - name: Verify release identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB='android/app/build/outputs/bundle/release/app-release.aab'
+          test -s "$AAB"
+          sha256sum "$AAB" | tee android/app/build/outputs/bundle/release/app-release.aab.sha256
+
+      - name: Upload unsigned release bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: BrennerCalc-unsigned-release-aab
+          path: |
+            android/app/build/outputs/bundle/release/app-release.aab
+            android/app/build/outputs/bundle/release/app-release.aab.sha256
+          if-no-files-found: error
+          retention-days: 7
