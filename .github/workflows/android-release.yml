@@ -6,11 +6,11 @@ on:
       version_name:
         description: Expected version name
         required: true
-        default: '1.0.0'
+        default: '1.0.1'
       version_code:
         description: Expected version code
         required: true
-        default: '1'
+        default: '2'
 
 permissions:
   contents: read
@@ -30,6 +30,9 @@ jobs:
           grep -F 'versionCode = ${{ inputs.version_code }}' android/app/build.gradle.kts
           grep -F 'applicationId = "de.kamilunavo.brennercalc"' android/app/build.gradle.kts
           grep -F 'targetSdk = 36' android/app/build.gradle.kts
+          grep -F 'android:icon="@mipmap/ic_launcher"' android/app/src/main/AndroidManifest.xml
+          test -f android/app/src/main/res/mipmap-nodpi/ic_launcher.png
+          test -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -88,7 +91,7 @@ jobs:
       - name: Upload release bundle
         uses: actions/upload-artifact@v4
         with:
-          name: BrennerCalc-1.0.0-1-PlayStore
+          name: BrennerCalc-1.0.1-2-PlayStore
           path: |
             android/app/build/outputs/bundle/release/app-release.aab
             android/app/build/outputs/bundle/release/app-release.aab.sha256
