@@ -22,8 +22,8 @@ android {
         applicationId = "de.kamilunavo.brennercalc"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -64,8 +64,6 @@ android {
 }
 
 dependencies {
-    // Keep the production build on the stable Android 16 / API 36 toolchain.
-    // Newer Core 1.19 / Activity 1.13 / Lifecycle 2.11 require API 37 at compile time.
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.activity:activity-compose:1.12.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
