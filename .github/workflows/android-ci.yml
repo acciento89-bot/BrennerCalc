@@ -52,10 +52,10 @@ jobs:
           grep -Fq 'versionCode = 2' android/app/build.gradle.kts
           grep -Fq 'versionName = "1.0.1"' android/app/build.gradle.kts
           grep -Fq 'android:icon="@mipmap/ic_launcher"' android/app/src/main/AndroidManifest.xml
-          grep -Fq 'generateLauncherIcon' android/app/build.gradle.kts
-          test -f android/app/build/generated/launcherIcon/res/mipmap-nodpi/ic_launcher.png
-          test -f android/app/build/generated/launcherIcon/res/drawable-nodpi/app_icon_source.png
+          test -f android/app/src/main/res/drawable/app_icon_source.xml
           test -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          grep -Fq '@drawable/app_icon_source' android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          ! grep -Fq 'generateLauncherIcon' android/app/build.gradle.kts
           sha256sum "$AAB" | tee android/app/build/outputs/bundle/release/app-release.aab.sha256
       - name: Upload unsigned release bundle
         uses: actions/upload-artifact@v4
