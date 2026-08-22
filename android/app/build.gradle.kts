@@ -3,27 +3,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val generatedIconResDir = layout.buildDirectory.dir("generated/launcherIcon/res").get().asFile
-val generateLauncherIcon by tasks.registering {
-    val sourceIcon = rootProject.file("../BrennerCalc/Assets.xcassets/AppIcon.appiconset/AppIcon.png")
-    inputs.file(sourceIcon)
-    outputs.dir(generatedIconResDir)
-    doLast {
-        if (!sourceIcon.isFile) throw GradleException("Canonical BrennerCalc AppIcon is missing: ${sourceIcon.path}")
-        val source = javax.imageio.ImageIO.read(sourceIcon)
-            ?: throw GradleException("Canonical BrennerCalc AppIcon could not be decoded")
-        listOf(
-            generatedIconResDir.resolve("drawable-nodpi/app_icon_source.png"),
-            generatedIconResDir.resolve("mipmap-nodpi/ic_launcher.png"),
-        ).forEach { output ->
-            output.parentFile.mkdirs()
-            if (!javax.imageio.ImageIO.write(source, "png", output)) {
-                throw GradleException("Could not encode normalized BrennerCalc launcher icon")
-            }
-        }
-    }
-}
-
 val uploadKeystorePath = System.getenv("ANDROID_UPLOAD_KEYSTORE_PATH")
 val uploadStorePassword = System.getenv("ANDROID_UPLOAD_STORE_PASSWORD")
 val uploadKeyAlias = System.getenv("ANDROID_UPLOAD_KEY_ALIAS")
@@ -43,7 +22,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    sourceSets.getByName("main").res.srcDir(generatedIconResDir)
     buildFeatures { compose = true; buildConfig = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -69,8 +47,6 @@ android {
         }
     }
 }
-
-tasks.named("preBuild").configure { dependsOn(generateLauncherIcon) }
 
 dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
