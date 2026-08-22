@@ -6,11 +6,11 @@ on:
       version_name:
         description: Expected version name
         required: true
-        default: '1.0.0'
+        default: '1.0.1'
       version_code:
         description: Expected version code
         required: true
-        default: '1'
+        default: '2'
 
 permissions:
   contents: read
@@ -21,7 +21,6 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-
       - name: Guard release identity
         shell: bash
         run: |
@@ -30,24 +29,23 @@ jobs:
           grep -F 'versionCode = ${{ inputs.version_code }}' android/app/build.gradle.kts
           grep -F 'applicationId = "de.kamilunavo.brennercalc"' android/app/build.gradle.kts
           grep -F 'targetSdk = 36' android/app/build.gradle.kts
-
+          grep -F 'android:icon="@mipmap/ic_launcher"' android/app/src/main/AndroidManifest.xml
+          grep -F 'generateLauncherIcon' android/app/build.gradle.kts
+          test -f BrennerCalc/Assets.xcassets/AppIcon.appiconset/AppIcon.png
+          test -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
       - name: Install Android 16 SDK
         run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
-
       - name: Set up Gradle 9.5
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.5.0'
-
       - name: Require signing secrets
         shell: bash
         env:
@@ -63,10 +61,8 @@ jobs:
           test -n "$KEY_PASSWORD"
           echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/brennercalc-upload.jks"
           test -s "$RUNNER_TEMP/brennercalc-upload.jks"
-
       - name: Run unit tests
         run: gradle -p android testDebugUnitTest --stacktrace
-
       - name: Build signed release App Bundle
         env:
           ANDROID_UPLOAD_KEYSTORE_PATH: ${{ runner.temp }}/brennercalc-upload.jks
@@ -74,7 +70,6 @@ jobs:
           ANDROID_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
           ANDROID_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
         run: gradle -p android bundleRelease --stacktrace
-
       - name: Verify signed App Bundle
         shell: bash
         run: |
@@ -84,11 +79,10 @@ jobs:
           jarsigner -verify -verbose -certs "$AAB" >/tmp/jarsigner.txt
           grep -q 'jar verified' /tmp/jarsigner.txt
           sha256sum "$AAB" | tee android/app/build/outputs/bundle/release/app-release.aab.sha256
-
       - name: Upload release bundle
         uses: actions/upload-artifact@v4
         with:
-          name: BrennerCalc-1.0.0-1-PlayStore
+          name: BrennerCalc-1.0.1-2-PlayStore
           path: |
             android/app/build/outputs/bundle/release/app-release.aab
             android/app/build/outputs/bundle/release/app-release.aab.sha256
