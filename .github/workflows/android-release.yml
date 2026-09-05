@@ -6,6 +6,10 @@ on:
     paths:
       - 'android/**'
       - '.github/workflows/android-release.yml'
+  pull_request:
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-release.yml'
   workflow_dispatch:
     inputs:
       version_name:
@@ -97,4 +101,4 @@ jobs:
             android/app/build/outputs/bundle/release/app-release.aab
             android/app/build/outputs/bundle/release/app-release.aab.sha256
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 1
