@@ -51,9 +51,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val showBillingStatus = shouldShowBillingStatus(
+            intent.getBooleanExtra("${BuildConfig.APPLICATION_ID}.STORE_SCREENSHOTS", false),
+        )
         setContent {
             val billing = remember { BillingManager(applicationContext) }
-            BrennerCalcRoot(activity = this, billing = billing)
+            BrennerCalcRoot(activity = this, billing = billing, showBillingStatus = showBillingStatus)
         }
     }
 }
@@ -61,7 +64,7 @@ class MainActivity : ComponentActivity() {
 private enum class BrennerScreen { HOME, OIL, GAS, WATER, PRO }
 
 @Composable
-private fun BrennerCalcRoot(activity: Activity, billing: BillingManager) {
+private fun BrennerCalcRoot(activity: Activity, billing: BillingManager, showBillingStatus: Boolean) {
     var language by remember { mutableStateOf(AppLanguage.DE) }
     var screen by remember { mutableStateOf(BrennerScreen.HOME) }
 
@@ -85,7 +88,7 @@ private fun BrennerCalcRoot(activity: Activity, billing: BillingManager) {
                 Column(Modifier.fillMaxSize()) {
                     BrandBar(language, billing.isPro) { language = it }
                     when (screen) {
-                        BrennerScreen.HOME -> HomeScreen(language, billing) { destination ->
+                        BrennerScreen.HOME -> HomeScreen(language, billing, showBillingStatus) { destination ->
                             screen = when {
                                 destination == BrennerScreen.OIL -> BrennerScreen.OIL
                                 destination == BrennerScreen.GAS && billing.isPro -> BrennerScreen.GAS
@@ -96,7 +99,7 @@ private fun BrennerCalcRoot(activity: Activity, billing: BillingManager) {
                         BrennerScreen.OIL -> OilCalculator(language) { screen = BrennerScreen.HOME }
                         BrennerScreen.GAS -> GasCalculator(language) { screen = BrennerScreen.HOME }
                         BrennerScreen.WATER -> WaterCalculator(language) { screen = BrennerScreen.HOME }
-                        BrennerScreen.PRO -> ProGate(language, activity, billing) { screen = BrennerScreen.HOME }
+                        BrennerScreen.PRO -> ProGate(language, activity, billing, showBillingStatus) { screen = BrennerScreen.HOME }
                     }
                 }
             }
@@ -108,6 +111,7 @@ private fun BrennerCalcRoot(activity: Activity, billing: BillingManager) {
 private fun HomeScreen(
     language: AppLanguage,
     billing: BillingManager,
+    showBillingStatus: Boolean,
     onOpen: (BrennerScreen) -> Unit,
 ) {
     Column(
@@ -164,7 +168,7 @@ private fun HomeScreen(
             }
         }
 
-        billing.statusMessage?.let { StatusBanner(it) }
+        if (showBillingStatus) billing.statusMessage?.let { StatusBanner(it) }
         NoteCard(
             if (language == AppLanguage.DE)
                 "Rechenhilfe für Fachkräfte. Herstellerangaben, Normen, Messwerte und die Verbrennungsanalyse haben immer Vorrang."
@@ -333,7 +337,7 @@ private fun WaterCalculator(language: AppLanguage, onBack: () -> Unit) {
 }
 
 @Composable
-private fun ProGate(language: AppLanguage, activity: Activity, billing: BillingManager, onBack: () -> Unit) {
+private fun ProGate(language: AppLanguage, activity: Activity, billing: BillingManager, showBillingStatus: Boolean, onBack: () -> Unit) {
     ToolScreen(
         code = "PRO",
         accent = Flame,
@@ -375,7 +379,7 @@ private fun ProGate(language: AppLanguage, activity: Activity, billing: BillingM
                 }
             }
         }
-        billing.statusMessage?.let { StatusBanner(it) }
+        if (showBillingStatus) billing.statusMessage?.let { StatusBanner(it) }
     }
 }
 
@@ -442,3 +446,6 @@ private fun FeatureLine(text: String) {
 
 private fun String.number(): Double = replace(',', '.').toDoubleOrNull() ?: 0.0
 private fun fmt(value: Double, digits: Int = 2): String = String.format(Locale.GERMANY, "%.${digits}f", value)
+
+
+internal fun shouldShowBillingStatus(storeScreenshots: Boolean): Boolean = !storeScreenshots
