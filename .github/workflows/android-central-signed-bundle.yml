@@ -1,0 +1,223 @@
+name: Android central-signed bundle (no Play upload)
+'on':
+  workflow_dispatch: {}
+  push:
+    branches:
+    - main
+    paths:
+    - .github/workflows/android-central-signed-bundle.yml
+permissions:
+  contents: read
+concurrency:
+  group: brennercalc-central-signed-bundle
+  cancel-in-progress: false
+env:
+  PACKAGE_NAME: de.kamilunavo.brennercalc
+  VERSION_CODE: '4'
+  VERSION_NAME: 1.0.2
+  BUNDLETOOL_URL: https://github.com/google/bundletool/releases/download/1.18.2/bundletool-all-1.18.2.jar
+  BUNDLETOOL_SHA256: 378b5434cd1378bef6b2bc527b8c7f0ff2584b273830335bce54d6d0813c8584
+  CENTRAL_SHA1: BCF2337D41E617C03BCAE698C09D1523654BD790
+  CENTRAL_SHA256: 7985BD6B33711BACA7E6BA722C2B3870EBBC802F7DB4A7BC1206BDAE51C4D5D6
+  SOURCE_COMMIT: ${{ github.sha }}
+  VERSION_OVERRIDE: versionCode 3 -> 4 in staged build only
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.event_name == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      artifact_id: ${{ steps.transfer.outputs.artifact-id }}
+      aab_sha256: ${{ steps.verify.outputs.aab_sha256 }}
+      payload_sha256: ${{ steps.verify.outputs.payload_sha256 }}
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: '17'
+    - uses: android-actions/setup-android@v3
+    - uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: 9.5.0
+    - name: Build version 4 without signing credentials
+      shell: bash
+      run: |
+        set -euo pipefail
+        sdkmanager 'platforms;android-36' 'build-tools;36.0.0' >/dev/null
+        python3 - <<'PY'
+        import pathlib
+        p = pathlib.Path('android/app/build.gradle.kts')
+        s = p.read_text()
+        assert s.count('versionCode = 3') == 1, 'Expected exactly one source versionCode 3'
+        p.write_text(s.replace('versionCode = 3', 'versionCode = 4'))
+        PY
+        cmp BrennerCalc/Assets.xcassets/AppIcon.appiconset/AppIcon.png android/app/src/main/res/drawable-nodpi/ic_launcher.png
+        grep -Fq 'android:icon="@drawable/ic_launcher"' android/app/src/main/AndroidManifest.xml
+        ! grep -Fq 'android:roundIcon=' android/app/src/main/AndroidManifest.xml
+        test -z "$(find android/app/src/main/res -type f \( -path '*/mipmap-anydpi*' -o -iname '*adaptive*' -o -iname '*foreground*' -o -iname '*background*' \) -print -quit)"
+        ! grep -Fq 'generateLauncherIcon' android/app/build.gradle.kts
+        env -u ANDROID_UPLOAD_KEYSTORE_PATH -u ANDROID_UPLOAD_STORE_PASSWORD -u ANDROID_UPLOAD_KEY_ALIAS -u ANDROID_UPLOAD_KEY_PASSWORD gradle -p android testDebugUnitTest bundleRelease --stacktrace
+        mkdir -p prepared
+        cp android/app/build/outputs/bundle/release/app-release.aab prepared/app-release.aab
+    - name: Install pinned official bundletool
+      shell: bash
+      run: |
+        set -euo pipefail
+        curl --fail --silent --show-error --location "$BUNDLETOOL_URL" -o "$RUNNER_TEMP/bundletool.jar"
+        printf '%s  %s\n' "$BUNDLETOOL_SHA256" "$RUNNER_TEMP/bundletool.jar" | sha256sum --check --strict
+    - name: Validate actual bundle identity and freeze unsigned payload
+      id: verify
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 - <<'PY'
+        import re, zipfile
+        with zipfile.ZipFile('prepared/app-release.aab') as z:
+            assert not any(re.fullmatch(r'META-INF/(?:[^/]+\.(?:SF|RSA|DSA|EC)|SIG-[^/]+)', n, re.I) for n in z.namelist()), 'Bundle already has a signer'
+        PY
+        java -jar "$RUNNER_TEMP/bundletool.jar" validate --bundle='prepared/app-release.aab'
+        test "$(java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle='prepared/app-release.aab' --xpath=/manifest/@package)" = "$PACKAGE_NAME"
+        test "$(java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle='prepared/app-release.aab' --xpath=/manifest/@android:versionCode)" = "$VERSION_CODE"
+        test "$(java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle='prepared/app-release.aab' --xpath=/manifest/@android:versionName)" = "$VERSION_NAME"
+        python3 - 'prepared/app-release.aab' > 'prepared/payload.json' <<'PY'
+        import hashlib, json, re, sys, zipfile
+        signature = re.compile(r"META-INF/(?:MANIFEST\.MF|[^/]+\.(?:SF|RSA|DSA|EC)|SIG-[^/]+)$", re.I)
+        with zipfile.ZipFile(sys.argv[1]) as z:
+            names = z.namelist()
+            assert len(names) == len(set(names)), "Duplicate bundle entries"
+            assert all(not n.startswith('/') and '..' not in n.split('/') for n in names), "Unsafe entry path"
+            assert all(not i.flag_bits & 1 for i in z.infolist()), "Encrypted entries"
+            payload = {n: hashlib.sha256(z.read(n)).hexdigest() for n in sorted(names) if not signature.fullmatch(n)}
+            assert 'base/manifest/AndroidManifest.xml' in payload, "Missing base manifest"
+            print(json.dumps(payload, sort_keys=True, separators=(',', ':')))
+        PY
+        aab_sha256=$(sha256sum prepared/app-release.aab | cut -d' ' -f1)
+        payload_sha256=$(sha256sum prepared/payload.json | cut -d' ' -f1)
+        echo "aab_sha256=$aab_sha256" >> "$GITHUB_OUTPUT"
+        echo "payload_sha256=$payload_sha256" >> "$GITHUB_OUTPUT"
+        cd prepared
+        sha256sum app-release.aab payload.json > SHA256SUMS
+    - name: Transfer validated bundle
+      id: transfer
+      uses: actions/upload-artifact@v4
+      with:
+        name: validated-unsigned-${{ github.run_id }}-${{ github.run_attempt }}
+        path: prepared/
+        if-no-files-found: error
+        retention-days: 1
+  sign:
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.event_name == 'push')
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        artifact-ids: ${{ needs.prepare.outputs.artifact_id }}
+        merge-multiple: true
+        path: prepared
+    - uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: '17'
+    - name: Install pinned official bundletool
+      shell: bash
+      run: |
+        set -euo pipefail
+        curl --fail --silent --show-error --location "$BUNDLETOOL_URL" -o "$RUNNER_TEMP/bundletool.jar"
+        printf '%s  %s\n' "$BUNDLETOOL_SHA256" "$RUNNER_TEMP/bundletool.jar" | sha256sum --check --strict
+    - name: Revalidate transfer before requesting KMS identity
+      shell: bash
+      env:
+        EXPECTED_AAB_SHA256: ${{ needs.prepare.outputs.aab_sha256 }}
+        EXPECTED_PAYLOAD_SHA256: ${{ needs.prepare.outputs.payload_sha256 }}
+      run: |
+        set -euo pipefail
+        printf '%s  %s\n' "$EXPECTED_AAB_SHA256" prepared/app-release.aab | sha256sum --check --strict
+        printf '%s  %s\n' "$EXPECTED_PAYLOAD_SHA256" prepared/payload.json | sha256sum --check --strict
+        java -jar "$RUNNER_TEMP/bundletool.jar" validate --bundle='prepared/app-release.aab'
+        test "$(java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle='prepared/app-release.aab' --xpath=/manifest/@package)" = "$PACKAGE_NAME"
+        test "$(java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle='prepared/app-release.aab' --xpath=/manifest/@android:versionCode)" = "$VERSION_CODE"
+        test "$(java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle='prepared/app-release.aab' --xpath=/manifest/@android:versionName)" = "$VERSION_NAME"
+        python3 - 'prepared/app-release.aab' > 'rechecked-payload.json' <<'PY'
+        import hashlib, json, re, sys, zipfile
+        signature = re.compile(r"META-INF/(?:MANIFEST\.MF|[^/]+\.(?:SF|RSA|DSA|EC)|SIG-[^/]+)$", re.I)
+        with zipfile.ZipFile(sys.argv[1]) as z:
+            names = z.namelist()
+            assert len(names) == len(set(names)), "Duplicate bundle entries"
+            assert all(not n.startswith('/') and '..' not in n.split('/') for n in names), "Unsafe entry path"
+            assert all(not i.flag_bits & 1 for i in z.infolist()), "Encrypted entries"
+            payload = {n: hashlib.sha256(z.read(n)).hexdigest() for n in sorted(names) if not signature.fullmatch(n)}
+            assert 'base/manifest/AndroidManifest.xml' in payload, "Missing base manifest"
+            print(json.dumps(payload, sort_keys=True, separators=(',', ':')))
+        PY
+        cmp prepared/payload.json rechecked-payload.json
+    - name: Restore central signing identity through KMS
+      uses: acciento89-bot/maengelfix/.github/actions/restore-central-android-signing@main
+    - name: Sign and verify certificate, identity, and unchanged payload
+      shell: bash
+      run: |
+        set -euo pipefail
+        test "$KAMILUNAVO_CENTRAL_UPLOAD_SHA1" = "$CENTRAL_SHA1"
+        test "$KAMILUNAVO_CENTRAL_UPLOAD_SHA256" = "$CENTRAL_SHA256"
+        mkdir -p release
+        cp prepared/app-release.aab release/app-release.aab
+        jarsigner -keystore "$ANDROID_UPLOAD_KEYSTORE_PATH" -storepass:env ANDROID_UPLOAD_KEYSTORE_PASSWORD -keypass:env ANDROID_UPLOAD_KEY_PASSWORD -sigalg SHA256withRSA -digestalg SHA-256 release/app-release.aab "$ANDROID_UPLOAD_KEY_ALIAS"
+        jarsigner -verify release/app-release.aab > "$RUNNER_TEMP/signed-verification.txt"
+        grep -Fq 'jar verified.' "$RUNNER_TEMP/signed-verification.txt"
+        keytool -J-Duser.language=en -printcert -jarfile release/app-release.aab > "$RUNNER_TEMP/certificate.txt"
+        actual_sha1=$(sed -n 's/^[[:space:]]*SHA1: //p' "$RUNNER_TEMP/certificate.txt" | tr -d ':\r\n ')
+        actual_sha256=$(sed -n 's/^[[:space:]]*SHA256: //p' "$RUNNER_TEMP/certificate.txt" | tr -d ':\r\n ')
+        test "$actual_sha1" = "$CENTRAL_SHA1"
+        test "$actual_sha256" = "$CENTRAL_SHA256"
+        python3 - 'release/app-release.aab' > 'release/payload.json' <<'PY'
+        import hashlib, json, re, sys, zipfile
+        signature = re.compile(r"META-INF/(?:MANIFEST\.MF|[^/]+\.(?:SF|RSA|DSA|EC)|SIG-[^/]+)$", re.I)
+        with zipfile.ZipFile(sys.argv[1]) as z:
+            names = z.namelist()
+            assert len(names) == len(set(names)), "Duplicate bundle entries"
+            assert all(not n.startswith('/') and '..' not in n.split('/') for n in names), "Unsafe entry path"
+            assert all(not i.flag_bits & 1 for i in z.infolist()), "Encrypted entries"
+            payload = {n: hashlib.sha256(z.read(n)).hexdigest() for n in sorted(names) if not signature.fullmatch(n)}
+            assert 'base/manifest/AndroidManifest.xml' in payload, "Missing base manifest"
+            print(json.dumps(payload, sort_keys=True, separators=(',', ':')))
+        PY
+        cmp prepared/payload.json release/payload.json
+        java -jar "$RUNNER_TEMP/bundletool.jar" validate --bundle='release/app-release.aab'
+        test "$(java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle='release/app-release.aab' --xpath=/manifest/@package)" = "$PACKAGE_NAME"
+        test "$(java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle='release/app-release.aab' --xpath=/manifest/@android:versionCode)" = "$VERSION_CODE"
+        test "$(java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle='release/app-release.aab' --xpath=/manifest/@android:versionName)" = "$VERSION_NAME"
+        cp "$RUNNER_TEMP/certificate.txt" release/upload-certificate.txt
+        python3 - <<'PY'
+        import json, os, pathlib
+        fields = ['GITHUB_REPOSITORY', 'GITHUB_SHA', 'GITHUB_RUN_ID', 'PACKAGE_NAME', 'VERSION_CODE', 'VERSION_NAME', 'CENTRAL_SHA1', 'CENTRAL_SHA256', 'SOURCE_RUN_ID', 'SOURCE_COMMIT', 'SOURCE_ARTIFACT_ID', 'SOURCE_ARTIFACT_DIGEST', 'VERSION_OVERRIDE']
+        pathlib.Path('release/provenance.json').write_text(json.dumps({k: os.environ.get(k) for k in fields}, indent=2) + '\n')
+        PY
+        cd release
+        sha256sum app-release.aab > app-release.aab.sha256
+        sha256sum payload.json upload-certificate.txt provenance.json > metadata.sha256
+        echo "Centrally signed $PACKAGE_NAME $VERSION_NAME ($VERSION_CODE); payload unchanged; no Play upload." >> "$GITHUB_STEP_SUMMARY"
+    - name: Destroy restored signing material
+      if: always()
+      shell: bash
+      run: |
+        rm -rf "$RUNNER_TEMP/kamilunavo-central-signing"
+        rm -f "$RUNNER_TEMP/kamilunavo-central-upload.p12"
+    - name: Publish verified centrally signed AAB
+      uses: actions/upload-artifact@v4
+      with:
+        name: BrennerCalc-${{ env.VERSION_NAME }}-${{ env.VERSION_CODE }}-central-signed-aab
+        path: release/
+        if-no-files-found: error
+        retention-days: 30
