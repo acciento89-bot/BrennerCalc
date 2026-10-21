@@ -10,7 +10,12 @@ def run_acceptance(adb,serial,product,host,test,proof,execute=subprocess.run):
  started=False
  def call(args,timeout=15):
   r=execute([str(adb),'-s',serial,*args],stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=timeout)
-  if r.returncode:raise RuntimeError('adb command failed: '+args[0])
+  if r.returncode:
+   if args[:3]==['shell','am','instrument']:
+    (proof/'instrumentation.txt').write_bytes(r.stdout or b'')
+    (proof/'instrumentation-stderr.txt').write_bytes(r.stderr or b'')
+    raise RuntimeError('Native instrumentation command failed')
+   raise RuntimeError('adb command failed: '+args[0])
   return r.stdout
  def capture(name,args):
   try:(proof/name).write_bytes(call(args,10));return True

@@ -48,6 +48,18 @@ class RunnerTests(unittest.TestCase):
   self.assertEqual(self.run_fixture(Fake(bad_native=True))['status'],'FAILED')
  def test_all_three_apk_hash_roles_are_retained_even_when_basenames_collide(self):
   r=self.run_fixture(Fake());self.assertEqual(set(r['apkSha256']),{'product','host','test'})
+ def test_nonzero_instrumentation_exit_retains_both_streams_and_failure(self):
+  class NonzeroInstrument(Fake):
+   def __call__(self,args,**kw):
+    if 'instrument' in args:
+     self.calls.append((args,kw.get('timeout')))
+     return subprocess.CompletedProcess(args,1,b'INSTRUMENTATION_FAILED: exact fixture reason',b'fixture adb stderr')
+    return super().__call__(args,**kw)
+  result=self.run_fixture(NonzeroInstrument())
+  self.assertEqual(result['status'],'FAILED')
+  self.assertEqual(result['error'],'Native instrumentation command failed')
+  self.assertEqual(self.files.get('instrumentation.txt'),b'INSTRUMENTATION_FAILED: exact fixture reason')
+  self.assertEqual(self.files.get('instrumentation-stderr.txt'),b'fixture adb stderr')
 class CleanupTests(unittest.TestCase):
  def test_cleanup_inventory_failure_is_not_treated_as_device_absence(self):
   spec=importlib.util.spec_from_file_location('cleanup',ROOT/'verify_cleanup.py');cleanup=importlib.util.module_from_spec(spec);spec.loader.exec_module(cleanup)
