@@ -14,6 +14,11 @@ struct ContentView: View {
                     VStack(spacing: 22) {
                         hero
                         calculatorGrid
+                        NavigationLink { ServiceProjectsView() } label: {
+                            Label("visits.projects", systemImage: "folder.fill")
+                                .font(.headline).frame(maxWidth: .infinity, alignment: .leading).padding(18)
+                                .background(AppTheme.panel, in: RoundedRectangle(cornerRadius: 18))
+                        }
                         safetyNote
                     }
                     .padding(.horizontal, 18)
@@ -208,4 +213,5 @@ private struct CalculatorCard: View {
 #Preview {
     ContentView()
         .environment(ProStore.preview)
+        .environment(ServiceVisitStore())
 }

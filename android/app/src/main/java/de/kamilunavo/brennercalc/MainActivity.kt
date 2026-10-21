@@ -47,6 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
+import java.io.File
+import androidx.compose.runtime.saveable.rememberSaveable
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,12 +65,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class BrennerScreen { HOME, OIL, GAS, WATER, PRO }
+private enum class BrennerScreen { HOME, OIL, GAS, WATER, PRO, PROJECTS }
 
 @Composable
 private fun BrennerCalcRoot(activity: Activity, billing: BillingManager, showBillingStatus: Boolean) {
-    var language by remember { mutableStateOf(AppLanguage.DE) }
-    var screen by remember { mutableStateOf(BrennerScreen.HOME) }
+    var language by rememberSaveable { mutableStateOf(AppLanguage.DE) }
+    var screen by rememberSaveable { mutableStateOf(BrennerScreen.HOME) }
+    val visits = remember { ServiceVisitStore(File(activity.filesDir, "BrennerCalc/service-visits.json")) }
 
     BackHandler(enabled = screen != BrennerScreen.HOME) { screen = BrennerScreen.HOME }
 
@@ -92,15 +95,17 @@ private fun BrennerCalcRoot(activity: Activity, billing: BillingManager, showBil
                     when (screen) {
                         BrennerScreen.HOME -> HomeScreen(language, billing, showBillingStatus) { destination ->
                             screen = when {
+                                destination == BrennerScreen.PROJECTS -> BrennerScreen.PROJECTS
                                 destination == BrennerScreen.OIL -> BrennerScreen.OIL
                                 destination == BrennerScreen.GAS && billing.isPro -> BrennerScreen.GAS
                                 destination == BrennerScreen.WATER && billing.isPro -> BrennerScreen.WATER
                                 else -> BrennerScreen.PRO
                             }
                         }
-                        BrennerScreen.OIL -> OilCalculator(language) { screen = BrennerScreen.HOME }
-                        BrennerScreen.GAS -> GasCalculator(language) { screen = BrennerScreen.HOME }
-                        BrennerScreen.WATER -> WaterCalculator(language) { screen = BrennerScreen.HOME }
+                        BrennerScreen.OIL -> OilCalculator(language, visits) { screen = BrennerScreen.HOME }
+                        BrennerScreen.GAS -> GasCalculator(language, visits) { screen = BrennerScreen.HOME }
+                        BrennerScreen.WATER -> WaterCalculator(language, visits) { screen = BrennerScreen.HOME }
+                        BrennerScreen.PROJECTS -> ServiceProjectsScreen(language, visits) { screen = BrennerScreen.HOME }
                         BrennerScreen.PRO -> ProGate(language, activity, billing, showBillingStatus) { screen = BrennerScreen.HOME }
                     }
                 }
@@ -159,6 +164,11 @@ private fun HomeScreen(
             onClick = { onOpen(BrennerScreen.WATER) },
         )
 
+        ToolCard(
+            code = "LOG", title = if (language == AppLanguage.DE) "Anlagen & Servicebesuche" else "Appliances & service visits",
+            subtitle = if (language == AppLanguage.DE) "Berechnungen speichern, Besuche vergleichen und Protokolle teilen." else "Save calculations, compare visits and share records.",
+            accent = Sky, onClick = { onOpen(BrennerScreen.PROJECTS) },
+        )
         if (!billing.isPro) {
             ProStrip(language, billing.productPrice) { onOpen(BrennerScreen.PRO) }
             TextButton(
@@ -181,13 +191,13 @@ private fun HomeScreen(
 }
 
 @Composable
-private fun OilCalculator(language: AppLanguage, onBack: () -> Unit) {
-    var reverse by remember { mutableStateOf(false) }
-    var ratedGph by remember { mutableStateOf("0,50") }
-    var desiredKw by remember { mutableStateOf("20") }
-    var pressure by remember { mutableStateOf("10") }
-    var calorific by remember { mutableStateOf("10") }
-    var efficiency by remember { mutableStateOf("90") }
+private fun OilCalculator(language: AppLanguage, visits: ServiceVisitStore, onBack: () -> Unit) {
+    var reverse by rememberSaveable { mutableStateOf(false) }
+    var ratedGph by rememberSaveable { mutableStateOf("0,50") }
+    var desiredKw by rememberSaveable { mutableStateOf("20") }
+    var pressure by rememberSaveable { mutableStateOf("10") }
+    var calorific by rememberSaveable { mutableStateOf("10") }
+    var efficiency by rememberSaveable { mutableStateOf("90") }
 
     ToolScreen(
         code = "ÖL",
@@ -247,6 +257,9 @@ private fun OilCalculator(language: AppLanguage, onBack: () -> Unit) {
                 accent = Flame,
             )
         }
+        VisitCaptureAction(language, visits, if (reverse) VisitKind.OIL_REVERSE else VisitKind.OIL,
+            if (reverse) mapOf("power" to desiredKw.visitNumber(), "pressure" to pressure.visitNumber(), "calorific" to calorific.visitNumber(), "efficiency" to efficiency.visitNumber())
+            else mapOf("nozzle" to ratedGph.visitNumber(), "pressure" to pressure.visitNumber(), "calorific" to calorific.visitNumber(), "efficiency" to efficiency.visitNumber()))
         NoteCard(
             if (language == AppLanguage.DE)
                 "Düsenangaben beziehen sich auf 7 bar Referenzdruck. Der reale Durchsatz wird mit dem eingestellten Pumpendruck korrigiert."
@@ -257,12 +270,12 @@ private fun OilCalculator(language: AppLanguage, onBack: () -> Unit) {
 }
 
 @Composable
-private fun GasCalculator(language: AppLanguage, onBack: () -> Unit) {
-    var reverse by remember { mutableStateOf(false) }
-    var flow by remember { mutableStateOf("2,0") }
-    var desiredKw by remember { mutableStateOf("20") }
-    var calorific by remember { mutableStateOf("10,5") }
-    var efficiency by remember { mutableStateOf("95") }
+private fun GasCalculator(language: AppLanguage, visits: ServiceVisitStore, onBack: () -> Unit) {
+    var reverse by rememberSaveable { mutableStateOf(false) }
+    var flow by rememberSaveable { mutableStateOf("2,0") }
+    var desiredKw by rememberSaveable { mutableStateOf("20") }
+    var calorific by rememberSaveable { mutableStateOf("10,5") }
+    var efficiency by rememberSaveable { mutableStateOf("95") }
 
     ToolScreen(
         code = "GAS",
@@ -303,13 +316,16 @@ private fun GasCalculator(language: AppLanguage, onBack: () -> Unit) {
                 FlameSoft,
             )
         }
+        VisitCaptureAction(language, visits, if (reverse) VisitKind.GAS_REVERSE else VisitKind.GAS,
+            if (reverse) mapOf("power" to desiredKw.visitNumber(), "calorific" to calorific.visitNumber(), "efficiency" to efficiency.visitNumber())
+            else mapOf("flow" to flow.visitNumber(), "calorific" to calorific.visitNumber(), "efficiency" to efficiency.visitNumber()))
     }
 }
 
 @Composable
-private fun WaterCalculator(language: AppLanguage, onBack: () -> Unit) {
-    var power by remember { mutableStateOf("20") }
-    var deltaT by remember { mutableStateOf("20") }
+private fun WaterCalculator(language: AppLanguage, visits: ServiceVisitStore, onBack: () -> Unit) {
+    var power by rememberSaveable { mutableStateOf("20") }
+    var deltaT by rememberSaveable { mutableStateOf("20") }
     val result = CalculatorEngine.water(power.number(), deltaT.number())
 
     ToolScreen(
@@ -334,6 +350,7 @@ private fun WaterCalculator(language: AppLanguage, onBack: () -> Unit) {
             ),
             accent = Sky,
         )
+        VisitCaptureAction(language, visits, VisitKind.WATER, mapOf("power" to power.visitNumber(), "deltaT" to deltaT.visitNumber()))
         NoteCard(if (language == AppLanguage.DE) "Berechnung für Wasser mit dem Faktor 1,163." else "Calculation for water using the factor 1.163.")
     }
 }
@@ -453,3 +470,5 @@ private fun fmt(value: Double, digits: Int = 2): String = String.format(Locale.G
 internal fun shouldShowBillingStatus(storeScreenshots: Boolean): Boolean = !storeScreenshots
 
 internal fun storeScreenshotsExtra(packageName: String): String = "$packageName.STORE_SCREENSHOTS"
+
+private fun String.visitNumber(): Double = replace(',', '.').toDoubleOrNull() ?: Double.NaN

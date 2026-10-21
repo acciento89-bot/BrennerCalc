@@ -12,3 +12,8 @@ xcuserdata/
 # Swift Package Manager
 .build/
 .swiftpm/
+
+# Android local build state
+android/.gradle/
+android/.kotlin/
+android/local.properties

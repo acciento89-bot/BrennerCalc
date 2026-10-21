@@ -22,6 +22,8 @@ struct HydronicCalculatorView: View {
                 ResultCard(icon: "arrow.left.arrow.right", title: "water.flowM3H", value: result.cubicMetersPerHour, unit: "m³/h")
             }
 
+            SaveServiceVisitButton(kind: .water, inputs: ["power": powerKW, "deltaT": deltaT])
+
             FormulaNote(text: "water.formulaNote")
         }
         .navigationTitle("calculator.water.short")
