@@ -19,6 +19,13 @@ wait_for_foreground() {
   local focus
   for attempt in $(seq 1 30); do
     focus="$(current_focus)"
+    # A fresh CI image can leave Launcher3's own ANR above the launched app.
+    # Close only that identified system launcher on the disposable emulator.
+    if [[ "$focus" == *"Application Not Responding: com.android.launcher3"* ]]; then
+      adb shell am force-stop com.android.launcher3
+      adb shell am start -W -n "$PACKAGE_NAME/.MainActivity" --ez "$PACKAGE_NAME.STORE_SCREENSHOTS" true
+      focus="$(current_focus)"
+    fi
     if [[ "$focus" == *"$PACKAGE_NAME"* ]]; then
       return 0
     fi
