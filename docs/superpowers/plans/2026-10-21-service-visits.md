@@ -35,8 +35,9 @@ Files: new ServiceVisitsView.swift; calculator views, ContentView, App, strings,
 Files: Android ServiceVisits.kt, ServiceVisitsUi.kt, MainActivity.kt; add cached Gson2.11.0 dependency; Tests ServiceVisitsTest.kt.
 - [x] Inspect native architecture, original5modes, billing and version.
 - [x] Write JUnit feature tests for formulas/comparison/validation, real JSON persistence, migration/corruption/future schema, share and write failure.
-- [ ] Root run `gradle --no-daemon -p android :app:testDebugUnitTest --tests de.kamilunavo.brennercalc.ServiceVisitsTest` for missingfeature RED.
-- [ ] Implement immutable model and atomic versioned JSON using unchanged Kotlin CalculatorEngine; same DE/EN reports.
-- [ ] Root run feature+existing full unit suite GREEN.
-- [ ] Integrate Compose list/detail/create/save/delete/share, state preservation and German/English copy; keep existing Pro entry restrictions.
-- [ ] Root build Android Debug and native parity QA; update evidence/docs and commit after verified.
+- [x] Root ran feature Gradle suite for missingfeature RED (android-red.log).
+- [x] Implement immutable model and atomic versioned JSON using unchanged Kotlin CalculatorEngine; same DE/EN reports.
+- [x] Root ran feature+existing full unit suite GREEN (android-green1.log).
+- [x] Integrate Compose list/detail/create/save/delete/share, state preservation and German/English copy; keep existing Pro entry restrictions.
+- [x] Root built Android Debug and repeated full unit suite: android-green2.log BUILD SUCCESSFUL; 11tests, zero failures/errors/skips.
+- [ ] Root completes native Android parity QA and native iOS/Duo acceptance.
