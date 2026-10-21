@@ -167,7 +167,7 @@ private struct VisitValuesView: View {
     var body: some View {
         ForEach(values.keys.sorted(), id: \.self) { key in
             VStack(alignment: .leading, spacing: 3) {
-                Text(LocalizedStringKey("visits.value.\(key)")).font(.caption).foregroundStyle(.secondary)
+                Text(LocalizedStringKey("visits.value." + key)).font(.caption).foregroundStyle(.secondary)
                 Text("\(values[key]!, format: .number.precision(.fractionLength(0...4))) \(kind.unit(for: key, input: true))")
                     .monospacedDigit().textSelection(.enabled)
             }
