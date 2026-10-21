@@ -29,7 +29,7 @@ def run_acceptance(adb,serial,product,host,test,proof,execute=subprocess.run):
   receipt['apkSha256']={role:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for role,p in [('product',product),('host',host),('test',test)]}
   for apk in [product,host,test]:call(['install','-r',str(apk)],90)
   info=call(['shell','dumpsys','package',PACKAGE]).decode(errors='replace');(proof/'installed-identity.txt').write_text(info)
-  if not re.search(r'\bversionCode=5\b',info) or not re.search(r'\bversionName=1\.1\.0\b',info):raise RuntimeError('Installed candidate identity mismatch')
+  if not re.search(r'\bversionCode=6\b',info) or not re.search(r'\bversionName=1\.1\.0\b',info):raise RuntimeError('Installed candidate identity mismatch')
   started=True
   result=call(['shell','am','instrument','-w','-r','-e','class',HOST+'.ApprovedCalcNativeTest#'+METHOD,HOST+'.test/androidx.test.runner.AndroidJUnitRunner'],300).decode(errors='replace')
   (proof/'instrumentation.txt').write_text(result)

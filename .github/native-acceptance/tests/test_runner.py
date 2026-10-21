@@ -10,7 +10,7 @@ class Fake:
    out=self.outcome
   elif 'ro.build.version.sdk' in s:out=self.sdk
   elif 'ro.kernel.qemu' in s:out='1'
-  elif 'dumpsys package de.kamilunavo.brennercalc' in s:out='versionCode=5 minSdk=26 targetSdk=36\nversionName=1.1.0'
+  elif 'dumpsys package de.kamilunavo.brennercalc' in s:out='versionCode=6 minSdk=26 targetSdk=36\nversionName=1.1.0'
   elif 'lastanr' in s:out='No ANR has occurred since boot'
   elif 'cat files/BrennerCalc/service-visits.json' in s:out='{"projects":[]}'
   elif 'tar -cf' in s:
@@ -60,6 +60,16 @@ class RunnerTests(unittest.TestCase):
   self.assertEqual(result['error'],'Native instrumentation command failed')
   self.assertEqual(self.files.get('instrumentation.txt'),b'INSTRUMENTATION_FAILED: exact fixture reason')
   self.assertEqual(self.files.get('instrumentation-stderr.txt'),b'fixture adb stderr')
+ def test_wrong_installed_candidate_identity_never_instruments(self):
+  for code,name in [('5','1.1.0'),('4','1.1.0'),('60','1.1.0'),('6','1.0.0'),('','1.1.0')]:
+   class WrongIdentity(Fake):
+    def __call__(self,args,**kw):
+     result=super().__call__(args,**kw)
+     if 'dumpsys package de.kamilunavo.brennercalc' in ' '.join(args):result.stdout=f'versionCode={code} minSdk=26 targetSdk=36\nversionName={name}'.encode()
+     return result
+   fake=WrongIdentity();result=self.run_fixture(fake)
+   self.assertEqual(result['status'],'FAILED');self.assertEqual(result['error'],'Installed candidate identity mismatch')
+   self.assertFalse(any('instrument' in args for args,_ in fake.calls))
 class CleanupTests(unittest.TestCase):
  def test_cleanup_inventory_failure_is_not_treated_as_device_absence(self):
   spec=importlib.util.spec_from_file_location('cleanup',ROOT/'verify_cleanup.py');cleanup=importlib.util.module_from_spec(spec);spec.loader.exec_module(cleanup)
