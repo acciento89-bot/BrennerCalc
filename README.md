@@ -50,3 +50,11 @@ BrennerCalc is a calculation aid for trained professionals. Manufacturer specifi
 - Apple StoreKit documentation — non-consumable In-App Purchase and StoreKit 2.
 
 © 2026 Kamilunavo
+
+## Saved service visits (update branch)
+
+The iOS app now has local appliance projects and dated calculator snapshots. Use **Save visit** from the current oil, gas or heating-water calculation, choose an appliance or create one, and add input-source and visit notes. The appliance history retains the exact calculation mode, inputs and calculated results. Consecutive visits in the same mode show absolute result changes; different modes are never compared. Share a DE/EN text visit record from appliance details.
+
+Data stays in the app's Application Support directory in a versioned, atomically written JSON archive. Invalid or newer archives are preserved and editing is blocked; there is no silent reset. This adds no account or network dependency. Existing Pro entry restrictions and formulas remain unchanged. The text record is a calculation worksheet, not certified measurement or commissioning documentation.
+
+Run the standalone Foundation checks with `sh Tests/run-core-tests.sh`. The existing Android app is not changed by this iOS update. Native layout, iPhone Duo, signed delivery and store acceptance require their own recorded validation.

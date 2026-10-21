@@ -20,6 +20,8 @@
 		B1000000000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000B /* Assets.xcassets */; };
 		B1000000000000000000000C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000C /* PrivacyInfo.xcprivacy */; };
 		B1000000000000000000000D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000000F /* Localizable.strings */; };
+		B10000000000000000000010 /* ServiceVisits.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000010 /* ServiceVisits.swift */; };
+		B10000000000000000000011 /* ServiceVisitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000011 /* ServiceVisitsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +40,8 @@
 		A1000000000000000000000C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A1000000000000000000000D /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		A1000000000000000000000E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A10000000000000000000010 /* ServiceVisits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceVisits.swift; sourceTree = "<group>"; };
+		A10000000000000000000011 /* ServiceVisitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceVisitsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +67,8 @@
 			isa = PBXGroup;
 			children = (
 				A10000000000000000000001 /* BrennerCalcApp.swift */,
+				A10000000000000000000011 /* ServiceVisitsView.swift */,
+				A10000000000000000000010 /* ServiceVisits.swift */,
 				A10000000000000000000002 /* ContentView.swift */,
 				A10000000000000000000003 /* DesignSystem.swift */,
 				A10000000000000000000004 /* CalculatorEngine.swift */,
@@ -160,6 +166,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				B10000000000000000000001 /* BrennerCalcApp.swift in Sources */,
+				B10000000000000000000011 /* ServiceVisitsView.swift in Sources */,
+				B10000000000000000000010 /* ServiceVisits.swift in Sources */,
 				B10000000000000000000002 /* ContentView.swift in Sources */,
 				B10000000000000000000003 /* DesignSystem.swift in Sources */,
 				B10000000000000000000004 /* CalculatorEngine.swift in Sources */,

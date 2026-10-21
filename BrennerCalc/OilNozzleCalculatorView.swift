@@ -62,6 +62,10 @@ struct OilNozzleCalculatorView: View {
                 }
             }
 
+            SaveServiceVisitButton(kind: mode == 0 ? .oil : .oilReverse, inputs: mode == 0
+                ? ["nozzle": nozzleGPH, "pressure": pressureBar, "calorific": calorificValue, "efficiency": efficiency]
+                : ["power": desiredOutputKW, "pressure": pressureBar, "calorific": calorificValue, "efficiency": efficiency])
+
             FormulaNote(text: "oil.formulaNote")
         }
         .navigationTitle("calculator.oil.short")

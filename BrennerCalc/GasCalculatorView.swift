@@ -53,6 +53,10 @@ struct GasCalculatorView: View {
                 }
             }
 
+            SaveServiceVisitButton(kind: mode == 0 ? .gas : .gasReverse, inputs: mode == 0
+                ? ["flow": cubicMetersPerHour, "calorific": calorificValue, "efficiency": efficiency]
+                : ["power": desiredOutputKW, "calorific": calorificValue, "efficiency": efficiency])
+
             FormulaNote(text: "gas.formulaNote")
         }
         .navigationTitle("calculator.gas.short")
