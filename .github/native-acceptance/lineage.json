@@ -4,7 +4,8 @@
   "method": "brennerRealOilVisitsSourcesHistoryRotationColdReloadAndShare",
   "method_sha256": "203e76c37ab46b9104beefe8e0a779c76aa5e05d1f7b09cc5ec1bca595c4f768",
   "method_body_unchanged": true,
-  "helpers": "All shared helper bodies retained verbatim; other two app @Test bodies and package constants removed. SDK-only fixture guard35 replaces36. No assertions/goldens/selectors or failure behavior changed.",
+  "helpers": "All original helpers retained except scroll: swipe endpoints are now clipped to the actual visible scrollable pane, fixing measured landscape-dialog failure. Business method, assertions, inputs, waits, steps, sharing and persistence checks unchanged.",
   "receiver_sha256": "e2b147101a45ffb233a6b728fb7f7774301e81da0781cb16b09c4af0a5d49a86",
-  "target": "BrennerCalc debug APK built by this checkout only; never other app install/data/purchase tests"
+  "target": "BrennerCalc debug APK built by this checkout only; never other app install/data/purchase tests",
+  "scrollEvidence": "39674755800 actual landscape viewport[911,263,1625,765], prior screen-wide swipe starts y864 outside; portrait XML still contains QA Before. Six real Java geometry cases RED\u2192GREEN."
 }

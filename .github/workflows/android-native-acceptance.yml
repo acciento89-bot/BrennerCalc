@@ -20,6 +20,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Verify actual landscape-dialog swipe geometry
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/scroll-geometry"
+          javac -d "$RUNNER_TEMP/scroll-geometry" .github/native-acceptance/host/app/src/androidTest/java/de/kamilunavo/approvedcalcqa/NativeScrollGesture.java .github/native-acceptance/tests/java/NativeScrollGestureTest.java
+          java -cp "$RUNNER_TEMP/scroll-geometry" de.kamilunavo.approvedcalcqa.NativeScrollGestureTest
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools

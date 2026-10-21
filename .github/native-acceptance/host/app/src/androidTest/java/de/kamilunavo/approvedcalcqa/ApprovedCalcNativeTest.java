@@ -229,8 +229,12 @@ public class ApprovedCalcNativeTest {
         capture(shot+"-locally-captured"); device.pressBack();
     }
     private void scroll(boolean up) {
-        int w=device.getDisplayWidth(),h=device.getDisplayHeight();
-        device.swipe(w/2, up?h/3:h*4/5, w/2, up?h*4/5:h/3, 30); device.waitForIdle(1000);
+        UiObject2 viewport=device.findObject(By.scrollable(true));
+        if(viewport==null)return;
+        android.graphics.Rect r=viewport.getVisibleBounds();
+        int[] p=NativeScrollGesture.plan(device.getDisplayWidth(),device.getDisplayHeight(),r.left,r.top,r.right,r.bottom,up);
+        if(p==null)return;
+        device.swipe(p[0],p[1],p[2],p[3],30); device.waitForIdle(1000);
     }
     private void top() { for(int i=0;i<10;i++) scroll(true); }
     private void hideKeyboard() {

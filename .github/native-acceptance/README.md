@@ -2,9 +2,9 @@
 
 Manual-only GitHub KVM job, separate from signing/upload. It builds the Brenner debug candidate from the checked-out commit and this independent native UiAutomator host. It uses official API35 x86_64 Google APIs (not Play), Pixel7,2048MiB. No personal device or app data is used. No billing, redemption, restore, AI, account or external messaging test is included.
 
-The exact existing external `brennerRealOilVisitsSourcesHistoryRotationColdReloadAndShare` method is copied without edits: oil inputs, source notes, two visits, history comparison, rotation, exact persisted JSON, real cold process restart and actual ACTION_SEND to the local QA receiver. No test record is injected into the product archive. Only that method and shared helper bodies are retained; MAG/Hydro methods, package queries and installation dependencies are absent. `lineage.json` pins the original file/method hashes. The only fixture adaptation is exact emulator SDK35 instead of36. Shared helper stale requery/SystemUI diagnostic behavior remains intact.
+The exact existing external `brennerRealOilVisitsSourcesHistoryRotationColdReloadAndShare` method is copied without edits: oil inputs, source notes, two visits, history comparison, rotation, exact persisted JSON, real cold process restart and actual ACTION_SEND to the local QA receiver. No test record is injected into the product archive. Only that method and shared helper bodies are retained; MAG/Hydro methods, package queries and installation dependencies are absent. `lineage.json` pins the original file/method hashes. The fixture uses exact emulator SDK35 instead of36. After actual landscape-dialog evidence, the scroll helper computes both swipe endpoints inside the visible scroll pane; all business assertions, inputs, waits and the original method remain unchanged. Shared helper stale requery/SystemUI diagnostic behavior remains intact.
 
-The app remains1.1.0(5); installation verifies actual package metadata. The test checks the debug flag before using `run-as`. No product, dependency, version, icon, Apple or signing source is changed by this harness.
+The app candidate is1.1.0(6); installation verifies actual package metadata. The test checks the debug flag before using `run-as`. No product, dependency, version, icon, Apple or signing source is changed by this harness.
 
 ## Source checks
 
