@@ -66,7 +66,7 @@ struct SettingsView: View {
                                     .font(.headline)
                                 Text("settings.aboutText")
                                     .foregroundStyle(AppTheme.muted)
-                                Text("Version 1.0.0")
+                                Text(verbatim: "Version " + (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"))
                                     .font(.caption)
                                     .foregroundStyle(AppTheme.muted)
                             }
